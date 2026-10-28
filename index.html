@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мастер-класс: От текста к результату</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#082f49'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(224, 242, 254, 0.9);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 50%, #f0f9ff 100%);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #075985 0%, #0284c7 100%);
+        }
+        
+        /* 3D Cube Styles */
+        .cube-wrapper {
+            perspective: 800px;
+        }
+        .cube {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s ease-out;
+        }
+        .cube-face {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border: 2px solid #0284c7;
+            background: rgba(224, 242, 254, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #0369a1;
+            border-radius: 16px;
+            box-shadow: inset 0 0 15px rgba(14, 165, 233, 0.2);
+            font-size: 14px;
+            text-align: center;
+            padding: 8px;
+        }
+        .face-front  { transform: translateZ(70px); }
+        .face-back   { transform: rotateY(180deg) translateZ(70px); }
+        .face-right  { transform: rotateY(90deg) translateZ(70px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(70px); }
+        .face-top    { transform: rotateX(90deg) translateZ(70px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(70px); }
+
+        @media print {
+            header, footer, .no-print { display: none !important; }
+            .print-area { display: block !important; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-in-out bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700">
+        <i id="toast-icon" class="fas fa-check-circle text-sky-400 text-xl"></i>
+        <span id="toast-message" class="text-sm font-medium">Сообщение</span>
+    </div>
+
+    <!-- Navigation Header with Interactive Timer -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 transition-all duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                        <i class="fas fa-book-open text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-extrabold uppercase tracking-widest text-brand-600 block">Методический портал спикера</span>
+                        <h1 class="text-base font-bold text-slate-800 leading-tight">От текста к результату</h1>
+                    </div>
+                </div>
+                
+                <nav class="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <a href="#about" class="hover:text-brand-600 transition-colors">О мастер-классе</a>
+                    <a href="#warmup" class="hover:text-brand-600 transition-colors">Разминка</a>
+                    <a href="#bank" class="hover:text-brand-600 transition-colors">Банк техник</a>
+                    <a href="#constructor" class="hover:text-brand-600 transition-colors">Конструктор</a>
+                    <a href="#practice" class="hover:text-brand-600 transition-colors">Практикум</a>
+                    <a href="#reflection" class="hover:text-brand-600 transition-colors">Рефлексия</a>
+                </nav>
+
+                <!-- Interactive Class Control Timer -->
+                <div class="flex items-center gap-3 bg-brand-50 px-4 py-2 rounded-2xl border border-brand-200">
+                    <div class="text-right hidden sm:block">
+                        <div id="stage-label" class="text-[10px] uppercase font-bold text-brand-600">Вводный этап</div>
+                        <div id="timer-display" class="text-base font-black font-mono text-slate-800">45:00</div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="toggleTimer()" id="timer-toggle-btn" title="Старт / Пауза" class="w-8 h-8 rounded-lg bg-brand-600 hover:bg-brand-700 text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fas fa-play" id="timer-icon"></i>
+                        </button>
+                        <button onclick="resetTimer()" title="Сбросить таймер" class="w-8 h-8 rounded-lg bg-white border border-brand-200 hover:bg-brand-100 text-slate-600 flex items-center justify-center text-xs transition-colors">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="about" class="relative overflow-hidden py-12 lg:py-20 gradient-bg border-b border-brand-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="grid lg:grid-cols-12 gap-10 items-center">
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-100/90 border border-brand-200 text-brand-800 text-xs font-bold uppercase tracking-wider">
+                            <i class="fas fa-chalkboard-teacher text-brand-600"></i>
+                            Интерактивное руководство для проведения
+                        </div>
+
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-tight">
+                            От текста к результату: <br/>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-700 via-brand-600 to-brand-400">
+                                Эффективные инструменты формирования читательской грамотности
+                            </span>
+                        </h1>
+
+                        <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                            Учебно-методическое интерактивное сопровождение мастер-класса. Комплексный разбор механик PISA/PIRLS, работа со сплошными и несплошными текстами, мозаика вопросов Блума и практические конструкторы заданий.
+                        </p>
+
+                        <!-- Key Methodical Pillars -->
+                        <div class="grid grid-cols-3 gap-3 pt-2">
+                            <div class="p-3 bg-white/80 rounded-xl border border-brand-200 text-center">
+                                <span class="block text-xs font-bold text-brand-700">1. Нахождение</span>
+                                <span class="text-[11px] text-slate-500">Локализация данных</span>
+                            </div>
+                            <div class="p-3 bg-white/80 rounded-xl border border-brand-200 text-center">
+                                <span class="block text-xs font-bold text-brand-700">2. Интеграция</span>
+                                <span class="text-[11px] text-slate-500">Интерпретация смыслов</span>
+                            </div>
+                            <div class="p-3 bg-white/80 rounded-xl border border-brand-200 text-center">
+                                <span class="block text-xs font-bold text-brand-700">3. Оценка</span>
+                                <span class="text-[11px] text-slate-500">Критическое осмысление</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <a href="#warmup" class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm px-6 py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition-all">
+                                Начать мастер-класс <i class="fas fa-play-circle ml-2"></i>
+                            </a>
+                            <a href="#constructor" class="bg-white hover:bg-brand-50 text-brand-700 font-semibold text-sm px-6 py-3.5 rounded-xl border border-brand-200 transition-all">
+                                Конструктор заданий
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Speaker Quick Board -->
+                    <div class="lg:col-span-5">
+                        <div class="hero-gradient p-6 sm:p-8 rounded-3xl text-white shadow-2xl relative">
+                            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-list-check text-brand-300"></i>
+                                План проведения мастер-класса:
+                            </h3>
+                            <div class="space-y-3 text-xs text-brand-50">
+                                <div class="p-3 bg-white/10 rounded-xl flex items-center justify-between border border-white/10">
+                                    <span>1. Входная диагностика и барьеры</span>
+                                    <span class="font-mono bg-white/20 px-2 py-0.5 rounded text-[10px]">10 мин</span>
+                                </div>
+                                <div class="p-3 bg-white/10 rounded-xl flex items-center justify-between border border-white/10">
+                                    <span>2. Интерактивный банк техник чтения</span>
+                                    <span class="font-mono bg-white/20 px-2 py-0.5 rounded text-[10px]">15 мин</span>
+                                </div>
+                                <div class="p-3 bg-white/10 rounded-xl flex items-center justify-between border border-white/10">
+                                    <span>3. Конструктор задач и Практикум</span>
+                                    <span class="font-mono bg-white/20 px-2 py-0.5 rounded text-[10px]">15 мин</span>
+                                </div>
+                                <div class="p-3 bg-white/10 rounded-xl flex items-center justify-between border border-white/10">
+                                    <span>4. Рефлексия и чек-лист педагога</span>
+                                    <span class="font-mono bg-white/20 px-2 py-0.5 rounded text-[10px]">10 мин</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Warmup & Diagnostics -->
+        <section id="warmup" class="py-16 bg-white border-b border-brand-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="text-brand-600 font-bold text-xs uppercase tracking-widest">Этап 1. Актуализация</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Экспресс-диагностика: Мои вызовы с текстом</h2>
+                    <p class="text-slate-600 text-sm mt-2">Проголосуйте вместе с аудиторией и оцените главные проблемы учеников при чтении</p>
+                </div>
+
+                <div class="grid lg:grid-cols-12 gap-8 items-start">
+                    <!-- Interactive Poll -->
+                    <div class="lg:col-span-6 glass-card p-6 sm:p-8 rounded-3xl border border-brand-200">
+                        <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-poll text-brand-600"></i>
+                            С какой главной проблемой сталкиваются ваши ученики?
+                        </h3>
+                        <div class="space-y-3" id="poll-options">
+                            <button onclick="votePoll(0)" class="w-full p-4 rounded-xl border border-slate-200 hover:border-brand-400 text-left transition-all bg-slate-50 hover:bg-brand-50/50 flex flex-col gap-2">
+                                <div class="flex justify-between text-xs font-semibold text-slate-700">
+                                    <span>Читают механически, не понимая суть</span>
+                                    <span id="poll-perc-0" class="text-brand-600 font-bold">42%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div id="poll-bar-0" class="bg-brand-600 h-full transition-all duration-500" style="width: 42%"></div>
+                                </div>
+                            </button>
+
+                            <button onclick="votePoll(1)" class="w-full p-4 rounded-xl border border-slate-200 hover:border-brand-400 text-left transition-all bg-slate-50 hover:bg-brand-50/50 flex flex-col gap-2">
+                                <div class="flex justify-between text-xs font-semibold text-slate-700">
+                                    <span>Теряются при виде диаграмм и таблицы (несплошной текст)</span>
+                                    <span id="poll-perc-1" class="text-brand-600 font-bold">35%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div id="poll-bar-1" class="bg-brand-600 h-full transition-all duration-500" style="width: 35%"></div>
+                                </div>
+                            </button>
+
+                            <button onclick="votePoll(2)" class="w-full p-4 rounded-xl border border-slate-200 hover:border-brand-400 text-left transition-all bg-slate-50 hover:bg-brand-50/50 flex flex-col gap-2">
+                                <div class="flex justify-between text-xs font-semibold text-slate-700">
+                                    <span>Не могут сформулировать собственное мнение/оценку</span>
+                                    <span id="poll-perc-2" class="text-brand-600 font-bold">23%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div id="poll-bar-2" class="bg-brand-600 h-full transition-all duration-500" style="width: 23%"></div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Matrix -->
+                    <div class="lg:col-span-6 bg-slate-900 text-white p-6 sm:p-8 rounded-3xl space-y-4">
+                        <h3 class="text-base font-bold text-brand-300 flex items-center gap-2">
+                            <i class="fas fa-balance-scale"></i>
+                            Сравнение подходов
+                        </h3>
+
+                        <div class="grid grid-cols-2 gap-4 text-xs pt-2">
+                            <div class="p-4 bg-slate-800/80 rounded-2xl border border-slate-700 space-y-2">
+                                <span class="text-rose-400 font-bold uppercase text-[10px] block">Традиционное чтение</span>
+                                <ul class="space-y-1.5 text-slate-300">
+                                    <li>• Воспроизведение текста</li>
+                                    <li>• Заучивание фактов</li>
+                                    <li>• Работа только с художественным текстом</li>
+                                    <li>• Однозначные ответы</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 bg-brand-950/80 rounded-2xl border border-brand-500/30 space-y-2">
+                                <span class="text-brand-300 font-bold uppercase text-[10px] block">Читательская грамотность</span>
+                                <ul class="space-y-1.5 text-brand-100">
+                                    <li>• Использование информации</li>
+                                    <li>• Критическая оценка</li>
+                                    <li>• Сплошные + Несплошные тексты</li>
+                                    <li>• Решение жизненных задач</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Interactive Strategy Bank -->
+        <section id="bank" class="py-16 gradient-bg border-b border-brand-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-10">
+                    <span class="text-brand-600 font-bold text-xs uppercase tracking-widest">Этап 2. Инструментарий</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Банк эффективных техник работы с текстом</h2>
+                    <p class="text-slate-600 text-sm mt-2">Выберите этап урока для ознакомления с методиками</p>
+                </div>
+
+                <!-- Stage Tabs -->
+                <div class="flex justify-center gap-2 mb-8" id="stage-tabs">
+                    <button onclick="switchStage('pre')" id="tab-pre" class="stage-btn active px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-brand-600 text-white shadow-md">
+                        1. До чтения (Предтекстовый)
+                    </button>
+                    <button onclick="switchStage('while')" id="tab-while" class="stage-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-700 hover:bg-brand-50 border border-brand-200">
+                        2. Во время чтения (Текстовый)
+                    </button>
+                    <button onclick="switchStage('post')" id="tab-post" class="stage-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-700 hover:bg-brand-50 border border-brand-200">
+                        3. После чтения (Послетекстовый)
+                    </button>
+                </div>
+
+                <!-- Stage 1: Pre-reading -->
+                <div id="stage-content-pre" class="stage-content space-y-6">
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center font-bold">1</div>
+                            <h4 class="font-bold text-slate-800 text-sm">Антиципация (Предвосхищение)</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">Догадка о содержании текста по заглавию, иллюстрациям или ключевым словам.</p>
+                            <span class="inline-block text-[10px] font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-md">Мотивация к чтению</span>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center font-bold">2</div>
+                            <h4 class="font-bold text-slate-800 text-sm">Дерево предсказаний</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">Своп-схема: Ствол — тема, Ветви — предположения («Что произойдет?»), Листья — аргументы.</p>
+                            <span class="inline-block text-[10px] font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-md">Прогнозирование</span>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl border border-brand-200 shadow-sm space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center font-bold">3</div>
+                            <h4 class="font-bold text-slate-800 text-sm">Верные / Неверные утверждения</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">Ученики отмечают «+» или «-» напротив 5 утверждений до прочтения и проверяют после.</p>
+                            <span class="inline-block text-[10px] font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-md">Целеполагание</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 2: While-reading -->
+                <div id="stage-content-while" class="stage-content hidden space-y-6">
+                    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-brand-200 shadow-xl space-y-6">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">Интерактивный тренажер «INSERT»</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Кликните по значкам для ознакомления с расшифровкой маркировки</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <button onclick="showInsertInfo('v')" class="p-4 bg-emerald-50 hover:bg-emerald-100 rounded-2xl border border-emerald-200 text-center transition-all">
+                                <div class="text-3xl font-black text-emerald-600">V</div>
+                                <div class="text-xs font-bold text-emerald-800 mt-1">Уже знал</div>
+                            </button>
+                            <button onclick="showInsertInfo('+')" class="p-4 bg-sky-50 hover:bg-sky-100 rounded-2xl border border-sky-200 text-center transition-all">
+                                <div class="text-3xl font-black text-sky-600">+</div>
+                                <div class="text-xs font-bold text-sky-800 mt-1">Новое</div>
+                            </button>
+                            <button onclick="showInsertInfo('-')" class="p-4 bg-amber-50 hover:bg-amber-100 rounded-2xl border border-amber-200 text-center transition-all">
+                                <div class="text-3xl font-black text-amber-600">-</div>
+                                <div class="text-xs font-bold text-amber-800 mt-1">Думал иначе</div>
+                            </button>
+                            <button onclick="showInsertInfo('?')" class="p-4 bg-rose-50 hover:bg-rose-100 rounded-2xl border border-rose-200 text-center transition-all">
+                                <div class="text-3xl font-black text-rose-600">?</div>
+                                <div class="text-xs font-bold text-rose-800 mt-1">Есть вопрос</div>
+                            </button>
+                        </div>
+
+                        <div id="insert-description" class="p-4 bg-brand-50 rounded-xl text-xs text-brand-900 leading-relaxed font-medium">
+                            Выберите любой маркер выше, чтобы прочитать методическую рекомендацию по его применению на уроке.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 3: Post-reading & Bloom's Cube -->
+                <div id="stage-content-post" class="stage-content hidden space-y-6">
+                    <div class="grid lg:grid-cols-12 gap-8 items-center">
+                        <!-- Interactive 3D Cube Section -->
+                        <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-brand-200 shadow-xl flex flex-col items-center justify-center space-y-6 text-center">
+                            <span class="text-xs font-bold text-brand-600 uppercase">Интерактивный инструмент</span>
+                            <h4 class="text-base font-bold text-slate-800">Кубик Блума</h4>
+                            
+                            <!-- 3D Cube Visual -->
+                            <div class="cube-wrapper my-4">
+                                <div class="cube" id="bloom-cube">
+                                    <div class="cube-face face-front">Назови</div>
+                                    <div class="cube-face face-back">Почему</div>
+                                    <div class="cube-face face-right">Объясни</div>
+                                    <div class="cube-face face-left">Предложи</div>
+                                    <div class="cube-face face-top">Придумай</div>
+                                    <div class="cube-face face-bottom">Поделись</div>
+                                </div>
+                            </div>
+
+                            <button onclick="rollCube()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md transition-all">
+                                <i class="fas fa-dice mr-2"></i> Бросить кубик!
+                            </button>
+
+                            <div id="cube-result" class="p-3 bg-brand-50 rounded-xl text-xs text-brand-800 font-semibold w-full">
+                                Нажмите на кнопку, чтобы выпала грань с началом вопроса.
+                            </div>
+                        </div>
+
+                        <!-- Post-reading Mechanics -->
+                        <div class="lg:col-span-7 space-y-4">
+                            <!-- Fishbone Card -->
+                            <div class="bg-white p-5 rounded-2xl border border-brand-200 shadow-sm space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                        <i class="fas fa-fish text-brand-600"></i> Схема «Фишбоун» (Причина — Следствие)
+                                    </h4>
+                                    <span class="text-[10px] font-bold bg-brand-100 text-brand-700 px-2 py-0.5 rounded">Анализ</span>
+                                </div>
+                                <p class="text-xs text-slate-600">Голова — Проблема; Верхние кости — Причины; Нижние кости — Факты из текста; Хвост — Вывод.</p>
+                            </div>
+
+                            <!-- RAFT Card -->
+                            <div class="bg-white p-5 rounded-2xl border border-brand-200 shadow-sm space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                        <i class="fas fa-user-ninja text-brand-600"></i> Конструктор «РАФТ»
+                                    </h4>
+                                    <span class="text-[10px] font-bold bg-brand-100 text-brand-700 px-2 py-0.5 rounded">Синтез</span>
+                                </div>
+                                <div class="grid grid-cols-4 gap-2 text-[11px] text-center font-semibold pt-1">
+                                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">R — Роль</div>
+                                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">A — Аудитория</div>
+                                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">F — Формат</div>
+                                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">T — Тема</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Task Constructor -->
+        <section id="constructor" class="py-16 bg-white border-b border-brand-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-10">
+                        <span class="text-brand-600 font-bold text-xs uppercase tracking-widest">Этап 3. Практикум педагога</span>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Конструктор задач по читательской грамотности</h2>
+                        <p class="text-slate-600 text-sm mt-2">Сгенерируйте корректную формулировку задания PISA/PIRLS под ваш тип текста</p>
+                    </div>
+
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl border border-brand-200 shadow-xl space-y-6">
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">1. Тип текста</label>
+                                <select id="const-text-type" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 text-xs font-semibold outline-none">
+                                    <option value="continuous">Сплошной (Статья, рассказ, эссе)</option>
+                                    <option value="non-continuous">Несплошной (Диаграмма, график, таблица)</option>
+                                    <option value="mixed">Составной (Текст + Инфографика)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">2. Уровень мышления</label>
+                                <select id="const-level" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 text-xs font-semibold outline-none">
+                                    <option value="find">1. Нахождение и извлечение информации</option>
+                                    <option value="integrate">2. Интеграция и интерпретация (Смысл)</option>
+                                    <option value="evaluate">3. Осмысление и оценка (Критика)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button onclick="generateTaskTemplate()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all text-xs uppercase tracking-wider">
+                            Сгенерировать формулировку задания <i class="fas fa-magic ml-2"></i>
+                        </button>
+
+                        <!-- Generated Output -->
+                        <div id="const-output" class="p-5 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-brand-700 uppercase">Шаблон формулировки вопроса:</span>
+                                <button onclick="copyGeneratedTask()" class="text-[11px] text-brand-600 hover:underline font-semibold">
+                                    <i class="fas fa-copy"></i> Копировать
+                                </button>
+                            </div>
+                            <p id="task-template-text" class="text-sm font-medium text-slate-800 leading-relaxed">
+                                «Найдите в тексте и выпишите три ключевых факта, подтверждающих позицию автора относительно...»
+                            </p>
+                            <div class="pt-2 border-t border-brand-200/60 text-[11px] text-slate-500">
+                                <strong>Критерий оценивания:</strong> 1 балл — дано полных 3 факта без искажения смысла; 0 баллов — менее 3 фактов или неверная интерпретация.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Live Case Practice -->
+        <section id="practice" class="py-16 gradient-bg border-b border-brand-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-10">
+                    <span class="text-brand-600 font-bold text-xs uppercase tracking-widest">Этап 4. Симуляция</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Интерактивный кейс с несплошным текстом</h2>
+                    <p class="text-slate-600 text-sm mt-2">Выполните микро-задание в роли ученика и проверьте методический комментарий</p>
+                </div>
+
+                <div class="grid lg:grid-cols-12 gap-8 items-start">
+                    <!-- Text Case Card -->
+                    <div class="lg:col-span-6 bg-white p-6 rounded-3xl border border-brand-200 shadow-lg space-y-4">
+                        <div class="inline-block px-3 py-1 bg-brand-100 text-brand-800 text-[10px] font-bold rounded-md">Несплошной текст: Памятка</div>
+                        <h3 class="text-base font-bold text-slate-800">«Циркадные ритмы и продуктивность»</h3>
+                        
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 text-xs text-slate-700">
+                            <div class="font-bold text-slate-900">Инфографика активности:</div>
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                    <div class="font-bold text-brand-600">08:00 - 12:00</div>
+                                    <div class="text-[10px] text-slate-500 mt-1">Пик умственной активности</div>
+                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                    <div class="font-bold text-amber-600">13:00 - 15:00</div>
+                                    <div class="text-[10px] text-slate-500 mt-1">Спад (Спад концентрации)</div>
+                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                    <div class="font-bold text-brand-600">16:00 - 18:00</div>
+                                    <div class="text-[10px] text-slate-500 mt-1">Второй пик (Аналитика)</div>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-500 italic">Исследование показывает, что важные решения следует принимать в периоды максимального уровня кортизола в крови.</p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Task Check -->
+                    <div class="lg:col-span-6 bg-white p-6 rounded-3xl border border-brand-200 shadow-lg space-y-4">
+                        <h3 class="text-base font-bold text-slate-800">Задание на оценку и синтез:</h3>
+                        <p class="text-xs text-slate-600">В какое время администрация школы должна проводить контрольные работы согласно данным инфографики?</p>
+
+                        <div class="space-y-2">
+                            <button onclick="checkCaseAnswer(0)" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-brand-400 text-xs font-semibold text-slate-700 transition-all flex items-center justify-between">
+                                <span>А) В 13:30 сразу после обеда</span>
+                                <i class="far fa-circle text-slate-400"></i>
+                            </button>
+                            <button onclick="checkCaseAnswer(1)" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-brand-400 text-xs font-semibold text-slate-700 transition-all flex items-center justify-between">
+                                <span>Б) С 09:00 до 11:00 во время первого пика</span>
+                                <i class="far fa-circle text-slate-400"></i>
+                            </button>
+                        </div>
+
+                        <div id="case-feedback" class="hidden p-4 rounded-xl text-xs space-y-1">
+                            <!-- JS injected feedback -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Reflection & Feedback -->
+        <section id="reflection" class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-12 gap-12">
+                    
+                    <!-- Left: Reflection Matrix & Form -->
+                    <div class="lg:col-span-6 space-y-6">
+                        <div>
+                            <span class="text-brand-600 font-bold text-xs uppercase tracking-widest">Этап 5. Итоги</span>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Рефлексия мастер-класса</h2>
+                            <p class="text-slate-600 text-sm mt-1">«Чемодан, мясорубка, корзина» & Обратная связь</p>
+                        </div>
+
+                        <!-- Reflection Tabs -->
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
+                            <div class="p-3 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200">
+                                <i class="fas fa-suitcase text-base block mb-1"></i> Чемодан
+                                <span class="block text-[10px] font-normal text-emerald-600 mt-0.5">Возьму с собой</span>
+                            </div>
+                            <div class="p-3 bg-amber-50 text-amber-800 rounded-xl border border-amber-200">
+                                <i class="fas fa-cogs text-base block mb-1"></i> Мясорубка
+                                <span class="block text-[10px] font-normal text-amber-600 mt-0.5">Переработаюсь</span>
+                            </div>
+                            <div class="p-3 bg-rose-50 text-rose-800 rounded-xl border border-rose-200">
+                                <i class="fas fa-trash-alt text-base block mb-1"></i> Корзина
+                                <span class="block text-[10px] font-normal text-rose-600 mt-0.5">Выброшу</span>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Form -->
+                        <form id="feedbackForm" onsubmit="submitFeedback(event)" class="glass-card p-6 rounded-3xl border border-brand-200 space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">ФИО Педагога *</label>
+                                <input type="text" id="fb-name" required placeholder="Иванова Анна Сергеевна" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-brand-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Оценка полезности</label>
+                                <div class="flex gap-2 text-xl text-amber-400 cursor-pointer" id="star-rating">
+                                    <i class="fas fa-star" onclick="setRating(1)"></i>
+                                    <i class="fas fa-star" onclick="setRating(2)"></i>
+                                    <i class="fas fa-star" onclick="setRating(3)"></i>
+                                    <i class="fas fa-star" onclick="setRating(4)"></i>
+                                    <i class="fas fa-star" onclick="setRating(5)"></i>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Главный вывод или отзыв</label>
+                                <textarea id="fb-text" rows="3" required placeholder="Какой инструмент вы примените на ближайшем уроке?" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-brand-500 resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-all">
+                                Сохранить отзыв
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Right: Feed & Final Checklist Download -->
+                    <div class="lg:col-span-6 space-y-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-base font-bold text-slate-900">Журнал рефлексии участников</h3>
+                            <button onclick="window.print()" class="no-print bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-slate-800 transition-colors">
+                                <i class="fas fa-print mr-1.5"></i> Распечатать чек-лист
+                            </button>
+                        </div>
+
+                        <!-- Live Reviews Feed -->
+                        <div id="reviews-feed" class="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+                            <!-- Dynamic items injected here -->
+                        </div>
+
+                        <!-- Final Teacher Checklist Printable Box -->
+                        <div class="p-6 bg-brand-50 rounded-3xl border border-brand-200 space-y-3 print-area">
+                            <h4 class="font-bold text-brand-900 text-sm uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-clipboard-check text-brand-600"></i> Чек-лист педагога: 5 шагов к результату
+                            </h4>
+                            <ul class="text-xs text-slate-700 space-y-2">
+                                <li class="flex items-start gap-2"><i class="fas fa-check text-brand-600 mt-0.5"></i> 1. Используйте сплошные и несплошные тексты 50/50.</li>
+                                <li class="flex items-start gap-2"><i class="fas fa-check text-brand-600 mt-0.5"></i> 2. Задавайте вопросы всех 6 уровней Кубика Блума.</li>
+                                <li class="flex items-start gap-2"><i class="fas fa-check text-brand-600 mt-0.5"></i> 3. Внедряйте маркировку INSERT для активного чтения.</li>
+                                <li class="flex items-start gap-2"><i class="fas fa-check text-brand-600 mt-0.5"></i> 4. Учите разграничивать факты и мнение автора.</li>
+                                <li class="flex items-start gap-2"><i class="fas fa-check text-brand-600 mt-0.5"></i> 5. Проводите письменную рефлексию в формате РАФТ.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-center text-xs">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="text-slate-300 font-semibold">Учебно-методический интерактивный комплекс для педагогов</p>
+            <p class="text-slate-500">«От текста к результату: эффективные инструменты формирования читательской грамотности»</p>
+        </div>
+    </footer>
+
+    <!-- Interactive JS Logic -->
+    <script>
+        // 1. Timer Functionality
+        let timerSeconds = 45 * 60;
+        let timerInterval = null;
+        let isTimerRunning = false;
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            document.getElementById('timer-display').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            // Stage update
+            const stageLabel = document.getElementById('stage-label');
+            if (timerSeconds > 35 * 60) stageLabel.innerText = "1. Вводный этап";
+            else if (timerSeconds > 20 * 60) stageLabel.innerText = "2. Банк техник";
+            else if (timerSeconds > 10 * 60) stageLabel.innerText = "3. Практикум";
+            else stageLabel.innerText = "4. Рефлексия";
+        }
+
+        function toggleTimer() {
+            const icon = document.getElementById('timer-icon');
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                icon.className = "fas fa-play";
+            } else {
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                    }
+                }, 1000);
+                isTimerRunning = true;
+                icon.className = "fas fa-pause";
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = 45 * 60;
+            document.getElementById('timer-icon').className = "fas fa-play";
+            updateTimerDisplay();
+        }
+
+        // 2. Poll Logic
+        let pollVotes = [42, 35, 23];
+        function votePoll(idx) {
+            pollVotes[idx] += 1;
+            const total = pollVotes.reduce((a, b) => a + b, 0);
+            pollVotes.forEach((votes, i) => {
+                const perc = Math.round((votes / total) * 100);
+                document.getElementById(`poll-perc-${i}`).innerText = `${perc}%`;
+                document.getElementById(`poll-bar-${i}`).style.width = `${perc}%`;
+            });
+            showToast("Ваш голос учтен в общей статистике!");
+        }
+
+        // 3. Stage Tabs Logic
+        function switchStage(stageKey) {
+            document.querySelectorAll('.stage-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.stage-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-600', 'text-white', 'shadow-md');
+                btn.classList.add('bg-white', 'text-slate-700');
+            });
+
+            document.getElementById(`stage-content-${stageKey}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${stageKey}`);
+            activeBtn.classList.remove('bg-white', 'text-slate-700');
+            activeBtn.classList.add('bg-brand-600', 'text-white', 'shadow-md');
+        }
+
+        // 4. INSERT Info Display
+        function showInsertInfo(symbol) {
+            const desc = document.getElementById('insert-description');
+            if (symbol === 'v') desc.innerText = "«V» (Уже знал): Отмечается информация, которая уже известна ученику. Укрепляет уверенность и баховый фундамент.";
+            if (symbol === '+') desc.innerText = "«+» (Новое): Отмечаются новые факты. Помогает расширять кругозор и фиксировать прирост знаний.";
+            if (symbol === '-') desc.innerText = "«-» (Думал иначе): Корректирует ошибочные представления и стереотипы учеников.";
+            if (symbol === '?') desc.innerText = "«?» (Есть вопрос): Повод для дискуссии в классе или домашнего исследования.";
+        }
+
+        // 5. 3D Bloom's Cube Rotation
+        const cubeFaces = [
+            { name: "Назови...", example: "Назови главных героев или ключевые факты из текста." },
+            { name: "Почему...", example: "Почему автор сделал именно такой вывод в третьем абзаце?" },
+            { name: "Объясни...", example: "Объясни взаимосвязь между двумя явлениями в тексте." },
+            { name: "Предложи...", example: "Предложи свое альтернативное решение данной проблемы." },
+            { name: "Придумай...", example: "Придумай другое название для текста, отражающее его суть." },
+            { name: "Поделись...", example: "Поделись своим мнением о поступке главного героя." }
+        ];
+
+        function rollCube() {
+            const cube = document.getElementById('bloom-cube');
+            const resultBox = document.getElementById('cube-result');
+            
+            const randomX = Math.floor(Math.random() * 4) * 360 + 720;
+            const randomY = Math.floor(Math.random() * 4) * 360 + 720;
+            
+            cube.style.transform = `rotateX(${randomX}deg) rotateY(${randomY}deg)`;
+
+            setTimeout(() => {
+                const face = cubeFaces[Math.floor(Math.random() * cubeFaces.length)];
+                resultBox.innerHTML = `<strong>Выпала грань «${face.name}»:</strong> ${face.example}`;
+            }, 1000);
+        }
+
+        // 6. Task Constructor Logic
+        function generateTaskTemplate() {
+            const type = document.getElementById('const-text-type').value;
+            const level = document.getElementById('const-level').value;
+            const textDisplay = document.getElementById('task-template-text');
+
+            if (level === 'find') {
+                textDisplay.innerText = type === 'non-continuous' 
+                    ? "«Изучите диаграмму и укажите точное значение показателя Х за 2023 год.»"
+                    : "«Найдите в первом абзаце и выпишите предложение, содержащее причину события...»";
+            } else if (level === 'integrate') {
+                textDisplay.innerText = "«Сопоставьте данные из таблицы с текстом и объясните, почему показатели различаются.»";
+            } else {
+                textDisplay.innerText = "«Оцените достоверность источника на основе приведенных аргументов и выразите собственную позицию.»";
+            }
+            showToast("Формулировка задания сгенерирована!");
+        }
+
+        function copyGeneratedTask() {
+            const text = document.getElementById('task-template-text').innerText;
+            const temp = document.createElement('input');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast("Текст скопирован в буфер обмена!");
+        }
+
+        // 7. Case Check
+        function checkCaseAnswer(idx) {
+            const fb = document.getElementById('case-feedback');
+            fb.classList.remove('hidden');
+            if (idx === 1) {
+                fb.className = "p-4 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-xl text-xs space-y-1";
+                fb.innerHTML = "<strong>Верно! (100%):</strong> Согласно данным инфографики, пик умственной активности приходится на 08:00–12:00. Это уровень нахождения и применения информации.";
+            } else {
+                fb.className = "p-4 bg-rose-50 text-rose-900 border border-rose-200 rounded-xl text-xs space-y-1";
+                fb.innerHTML = "<strong>Неверно:</strong> В 13:30 наблюдается спад концентрации. Повторите анализ инфографики.";
+            }
+        }
+
+        // 8. Rating and Feedback Storage
+        let currentRating = 5;
+        function setRating(val) {
+            currentRating = val;
+            const stars = document.querySelectorAll('#star-rating i');
+            stars.forEach((star, i) => {
+                star.className = i < val ? "fas fa-star" : "far fa-star text-slate-300";
+            });
+        }
+
+        function submitFeedback(e) {
+            e.preventDefault();
+            const name = document.getElementById('fb-name').value;
+            const text = document.getElementById('fb-text').value;
+
+            const review = { name, text, rating: currentRating, date: new Date().toLocaleDateString() };
+            
+            let reviews = JSON.parse(localStorage.getItem('mc_reviews') || '[]');
+            reviews.unshift(review);
+            localStorage.setItem('mc_reviews', JSON.stringify(reviews));
+
+            renderReviews();
+            document.getElementById('feedbackForm').reset();
+            setRating(5);
+            showToast("Отзыв успешно сохранен!");
+        }
+
+        function renderReviews() {
+            const feed = document.getElementById('reviews-feed');
+            let reviews = JSON.parse(localStorage.getItem('mc_reviews') || '[]');
+            
+            if (reviews.length === 0) {
+                reviews = [
+                    { name: "Смирнова Елена", text: "Кубик Блума и конструктор заданий — супер! Обязательно использую на уроке.", rating: 5, date: "Сегодня" },
+                    { name: "Петров Игорь", text: "Отличная структура мастер-класса. Все практично и без лишней теории.", rating: 5, date: "Вчера" }
+                ];
+            }
+
+            feed.innerHTML = reviews.map(r => `
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-800">${r.name}</span>
+                        <span class="text-amber-400 font-bold">${'★'.repeat(r.rating)}</span>
+                    </div>
+                    <p class="text-xs text-slate-600">«${r.text}»</p>
+                </div>
+            `).join('');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        window.onload = function() {
+            updateTimerDisplay();
+            renderReviews();
+        }
+    </script>
+</body>
+</html>
